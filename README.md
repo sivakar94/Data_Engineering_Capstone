@@ -3,7 +3,7 @@
 
 
 ##### PROJECT SUMMARY: 
-The objective of this project was to create an Elt pipeline for I94 immigration, global land temperatures and happiness and Human development index datsets to form an analytics database on immigration events. 
+The purpose of this project to create an open analytical database for consumption by US Government so they are able to understand immigration patterns.
 
 A use case for this analytics database is to find immigration patterns for the US immigration department.
 
@@ -13,54 +13,61 @@ For example, they could try to find answears to questions such as,
 - Do people come from developed countries?
 - Does Freedom and Human development imply in the number of people coming in to the us?
 
-##### Data and Code
+##### Data Sources
+- I94 Immigration Data: This data comes from the US National Tourism and Trade Office. A data dictionary is included in the workspace.
+- World Temperature Data: This dataset came from Kaggle. You can read more about it here.
+- U.S. City Demographic Data: This data comes from OpenSoft. You can read more about it here.
+- Happiness data & Human Development data: 
+The World Happiness Report is a well-known source of cross-country data and research on self-reported life satisfaction. The table here shows, country by country, the ‘happiness scores’ extracted this report
+
 All the data for this project was loaded into S3 prior to commencing the project. 
 
-The project workspace includes:
+Built With
+The section covers tools used to enable the project.
 
-etl.py - reads data from S3, processes that data using Spark, and writes processed data as a set of dimensional tables back to S3
-etl_functions.py - these modules contains the functions for creating fact and dimension tables, data visualizations and cleaning.
-config.cfg - contains configuration that allows the ETL pipeline to access AWS EMR cluster.
-Jupyter Notebooks - jupyter notebook that was used for building the ETL pipeline.
+1) Amazon EMR process data and output to s3
+2) PySpark to process and carry out ETL
+3) Bash to create the infrastructure and delete the infrastructure
 
-## Open-Ended Project
-If you decide to design your own project, you can find useful information in the Project Resources section. Rather than go through steps below with the data Udacity provides, you'll gather your own data, and go through the same process.
+##### Data Model
 
-## Instructions
-To help guide your project, we've broken it down into a series of steps.
+![alt text](Image/data_model.png)
 
-### Step 1: Scope the Project and Gather Data
-Since the scope of the project will be highly dependent on the data, these two things happen simultaneously. In this step, you’ll:
+## Project Files
 
-Identify and gather the data you'll be using for your project (at least two sources and more than 1 million rows). See Project Resources for ideas of what data you can use.
-Explain what end use cases you'd like to prepare the data for (e.g., analytics table, app back-end, source-of-truth database, etc.)
+1. etl.py - Contains all the logic to extract data from S3 and process data on spark and then load data as parquet files into the s3 folder and region specified by user.
+2. sparkSubmit.sh - Shell file that will get executed on the emr cluster and will call the spark submit on the cluster and will run the etl.py
+3. createCluster.sh - Contains the pipeline to automate infrastructure requirements which will create the emr cluster, load the etl.py file on the cluster and load data from udacity s3 into user specific s3 bucket
+4. terminateCluster.sh - Contains the pipeline to destroy the infratsructure associated with the project.
 
-### Step 2: Explore and Assess the Data
-Explore the data to identify data quality issues, like missing values, duplicate data, etc.
-Document steps necessary to clean the data
+## Extra Files
 
-### Step 3: Define the Data Model
-Map out the conceptual data model and explain why you chose that model
-List the steps necessary to pipeline the data into the chosen data model
+- Captsone Project Template.ipynb contains all the exploring, building the the data pipeline steps, including quality checks and answers all the project related questions in more detail.
 
-### Step 4: Run ETL to Model the Data
-Create the data pipelines and the data model
-Include a data dictionary
-Run data quality checks to ensure the pipeline ran as expected
-Integrity constraints on the relational database (e.g., unique key, data type, etc.)
-Unit tests for the scripts to ensure they are doing the right thing
-Source/count checks to ensure completeness
+- helperFunctions.py has some functions that will be used by spark to run jobs.
 
-### Step 5: Complete Project Write Up
-What's the goal? What queries will you want to run? How would Spark or Airflow be incorporated? Why did you choose the model you chose?
-Clearly state the rationale for the choice of tools and technologies for the project.
-Document the steps of the process.
-Propose how often the data should be updated and why.
-Post your write-up and final data model in a GitHub repo.
-Include a description of how you would approach the problem differently under the following scenarios:
-If the data was increased by 100x.
-If the pipelines were run on a daily basis by 7am.
-If the database needed to be accessed by 100+ people.
-Rubric
+- i94MetadataMappings.py has various mappings of fields and codes that are used by immigration. These mappings are leveraged in spark job to perform etl and build some dimension tables
 
-In the Project Rubric, you'll see more detail about the requirements. Use the rubric to assess your own project before you submit to Udacity for review. As with other projects, Udacity reviewers will use this rubric to assess your project and provide feedback. If your project does not meet specifications, you can make changes and resubmit.
+- qualityTests.py has quality tests that are used by etl to assess quality of the data, so no poor quality data is created
+
+## Running the ETL pipeline
+
+1. Create the editor role in aws iam
+
+2. Configure the aws cli with the editor role access key and secret.
+
+3. Create the ssh key pair for ec2 instance using aws cli, give it a name such as my-key-pair. Make sure key is stored in root directory and is in the same region in which emr cluster/ec2 instances will be created. aws ec2 create-key-pair --key-name my-key-pair --query "KeyMaterial" --output text > my-key-pair.pem
+
+4. If you're connecting to your instance from a Linux computer, it is recommended that you use the following command to set the permissions of your private key file so that only you can read it. chmod 400 MyKeyPair.pem
+
+5. Open terminal
+
+6. Run createCluster.sh script to create the emr cluster and execute the spark job on the cluster .Pass the cluster name as first choice of argument and name of the key associated with ec2 instance
+
+bash createCluster.sh <cluster_name> <keyName>
+
+## Destrying the infrastructure to avoid costs
+
+1.Run TerminalCluster.sh that will eliminate the cluster
+
+Updates are on going...
