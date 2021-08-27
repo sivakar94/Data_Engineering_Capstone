@@ -11,7 +11,9 @@ from pyspark.sql.types import IntegerType
 from pyspark.sql.functions import monotonically_increasing_id
 
 # Importing helper functions
-import preprocess_functions
+from qualityTests import (check_data_type, check_greater_that_zero,
+                          check_unique_keys, ensure_no_nulls)
+
 import etl_functions
 
 config = configparser.ConfigParser()
